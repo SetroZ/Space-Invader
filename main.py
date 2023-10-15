@@ -2,10 +2,13 @@ import pygame
 import random
 import math
 from pygame import mixer
+import os
 
 # intialize the pygame
 pygame.init()
 # create the screen (w,h)
+current_dir = os.path.dirname("Space-Invader")
+os.chdir(os.path.join(current_dir, "./Space-Invader"))
 
 screen = pygame.display.set_mode((800, 600))
 background = pygame.image.load("Data/space.jpg")
@@ -29,9 +32,9 @@ Speed_enemy = 0.3
 # Player
 playerimg = pygame.image.load("Data/ufo.png")
 gunimg = pygame.image.load("Data/rocket2.png")
-a = pygame.image.load('Data/heart1.png')
-b = pygame.image.load('Data/heart1.png')
-c = pygame.image.load('Data/heart1.png')
+a = pygame.image.load("Data/heart1.png")
+b = pygame.image.load("Data/heart1.png")
+c = pygame.image.load("Data/heart1.png")
 
 # 800/2=400
 # so, lower than 400 = left
@@ -47,7 +50,7 @@ enemyX = []
 enemyY = []
 enemymoveY = []
 enemymoveX = []
-num_of_enemies = 5
+num_of_enemies = 10
 
 for i in range(num_of_enemies):
     enemyimg.append(pygame.image.load("Data/alien2.png"))
@@ -72,6 +75,7 @@ def collision(x, y, X2, Y2, distance1):
 
 
 # draw image
+
 
 def player(img, x, y):
     screen.blit(img, (x, y))
@@ -159,8 +163,8 @@ while running:
             if event.key == pygame.K_r:
                 if Restart == "True":
                     for j in range(num_of_enemies):
-                        enemyX[j] = (random.randint(0, 736))
-                        enemyY[j] = (random.randint(0, 150))
+                        enemyX[j] = random.randint(0, 736)
+                        enemyY[j] = random.randint(0, 150)
                     score_value = 0
                     menu = "False"
                     music = "Data/background.wav"
@@ -170,9 +174,9 @@ while running:
                     playerX = 370
                     playerY = 480
                     Lives = 3
-                    a = pygame.image.load('Data/heart1.png')
-                    b = pygame.image.load('Data/heart1.png')
-                    c = pygame.image.load('Data/heart1.png')
+                    a = pygame.image.load("Data/heart1.png")
+                    b = pygame.image.load("Data/heart1.png")
+                    c = pygame.image.load("Data/heart1.png")
 
     if menu == "True":
         loserfunc(215, 300)
@@ -193,16 +197,15 @@ while running:
         playerY = 536
 
     for i in range(num_of_enemies):
-
         if enemyX[i] <= 0:
             enemymoveX[i] = Speed_enemy
         elif enemyX[i] >= 736:
-            enemymoveX[i] = (-1 * Speed_enemy)
+            enemymoveX[i] = -1 * Speed_enemy
 
         if enemyY[i] <= 0:
             enemymoveY[i] = Speed_enemy
         elif enemyY[i] >= 536:
-            enemymoveY[i] = (-1 * Speed_enemy)
+            enemymoveY[i] = -1 * Speed_enemy
 
         collison2 = collision(enemyX[i], enemyY[i], gunX, gunY, 30)
         if collison2:
