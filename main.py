@@ -108,7 +108,7 @@ def highest(x, y):
     screen.blit(highest, (x, y))
 
 
-print("s")
+ 
 
 
 # Game Loop makes sure that the game is always running
