@@ -1,8 +1,9 @@
-import pygame, asyncio, time
+import pygame, asyncio
 import random
 import math
 from pygame import mixer
 import os
+
 
 # Initialize the pygame
 pygame.init()
@@ -108,7 +109,7 @@ def highest(x, y):
     screen.blit(highest, (x, y))
 
 
- 
+print("s")
 
 
 # Game Loop makes sure that the game is always running
@@ -244,13 +245,13 @@ async def main():
                 gun_state = "Ready"
             if gun_state == "Fire":
                 fire(gunX, gunY)
-                gunY += gunmoveY*4
+                gunY += gunmoveY * 4
             enemyY[i] += enemymoveY[i]
             enemyX[i] += enemymoveX[i]
-        playerY += movey*10
-        playerY += movey2*10
-        playerX += move*10
-        playerX += move2*10
+        playerY += movey * 10
+        playerY += movey2 * 10
+        playerX += move * 10
+        playerX += move2 * 10
 
         highest(10, 60)
         display_score(fontX, fontY)
@@ -269,5 +270,3 @@ async def main():
 running = True
 # Run the main function using asyncio.run
 asyncio.run(main())
-
-
