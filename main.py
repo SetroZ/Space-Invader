@@ -1,17 +1,15 @@
-import pygame
+import pygame, asyncio, time
 import random
 import math
 from pygame import mixer
 import os
 
-# intialize the pygame
+# Initialize the pygame
 pygame.init()
-# create the screen (w,h)
-current_dir = os.path.dirname("Space-Invader")
-os.chdir(os.path.join(current_dir, "./Space-Invader"))
 
+# Create the screen (w,h)
 screen = pygame.display.set_mode((800, 600))
-background = pygame.image.load("Data/space.jpg")
+background = pygame.image.load("Data/space.jpg").convert()
 music = "Data/background.wav"
 mixer.music.load(music)
 mixer.music.play(-1)
@@ -19,16 +17,14 @@ Restart = "False"
 menu = "False"
 score_value = 0
 score_highest = 0
-score_test = score_value
 Lives = 3
-
-# events are anything happening on the window
 
 # Title and icon
 pygame.display.set_caption("Space Invaders")
 icon = pygame.image.load("Data/spaceship.png")
 pygame.display.set_icon(icon)
-Speed_enemy = 0.3
+Speed_enemy = 2.5
+
 # Player
 playerimg = pygame.image.load("Data/ufo.png")
 gunimg = pygame.image.load("Data/rocket2.png")
@@ -36,15 +32,15 @@ a = pygame.image.load("Data/heart1.png")
 b = pygame.image.load("Data/heart1.png")
 c = pygame.image.load("Data/heart1.png")
 
-# 800/2=400
-# so, lower than 400 = left
-# bigger than 400=right
+# Player initial position
 playerX = 370
 playerY = 480
 move = 0
 move2 = 0
 movey = 0
 movey2 = 0
+
+# Enemy initialization
 enemyimg = []
 enemyX = []
 enemyY = []
@@ -59,7 +55,7 @@ for i in range(num_of_enemies):
     enemymoveX.append(Speed_enemy)
     enemymoveY.append(Speed_enemy)
 
-# gun
+# Gun initialization
 gunX = 0
 gunY = 0
 gunmoveY = 0
@@ -74,17 +70,12 @@ def collision(x, y, X2, Y2, distance1):
         return False
 
 
-# draw image
-
-
+# Draw image
 def player(img, x, y):
     screen.blit(img, (x, y))
 
 
 def enemy(x, y, i):
-    # blit=draw player
-    # x=width
-    # y=height
     screen.blit(enemyimg[i], (x, y))
 
 
@@ -117,151 +108,164 @@ def highest(x, y):
     screen.blit(highest, (x, y))
 
 
+print("s")
+
+
 # Game Loop makes sure that the game is always running
-running = True
-while running:
-    # screen color
-    screen.fill((0, 0, 0))
+async def main():
+    bullet_sound = mixer.Sound("Data/laser.wav")
+    Lose = mixer.Sound("Data/Loser.ogg")
+    global playerX, movey, movey2, move, move2, a, b, c, running, score_value, score_highest, Lives, menu, Restart, gun_state, playerY
+    while running:
+        # screen color
+        screen.fill((0, 0, 0))
 
-    screen.blit(background, (0, 0))
+        screen.blit(background, (0, 0))
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
 
-        # if  a key is pressed check whether it is left or right
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT or event.key == pygame.K_a:
-                move2 = -0.5
-            if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
-                move = 0.5
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_LEFT or event.key == pygame.K_a:
-                move2 = 0
-            if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
-                move = 0
+            # if a key is pressed check whether it is left or right
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT or event.key == pygame.K_a:
+                    move2 = -0.5
+                if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                    move = 0.5
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT or event.key == pygame.K_a:
+                    move2 = 0
+                if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                    move = 0
 
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP or event.key == pygame.K_w:
-                movey2 = -0.5
-            if event.key == pygame.K_DOWN or event.key == pygame.K_s:
-                movey = 0.5
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_UP or event.key == pygame.K_w:
-                movey2 = 0
-            if event.key == pygame.K_DOWN or event.key == pygame.K_s:
-                movey = 0
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                if gun_state == "Ready":
-                    bullet_sound = mixer.Sound("Data/laser.wav")
-                    bullet_sound.play()
-                    gunY = playerY
-                    gunX = playerX
-                    fire(gunX, gunY)
-                    gunmoveY = -0.5
-            if event.key == pygame.K_r:
-                if Restart == "True":
-                    for j in range(num_of_enemies):
-                        enemyX[j] = random.randint(0, 736)
-                        enemyY[j] = random.randint(0, 150)
-                    score_value = 0
-                    menu = "False"
-                    music = "Data/background.wav"
-                    mixer.music.load(music)
-                    mixer.music.play(-1)
-                    Restart = "False"
-                    playerX = 370
-                    playerY = 480
-                    Lives = 3
-                    a = pygame.image.load("Data/heart1.png")
-                    b = pygame.image.load("Data/heart1.png")
-                    c = pygame.image.load("Data/heart1.png")
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP or event.key == pygame.K_w:
+                    movey2 = -0.5
+                if event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                    movey = 0.5
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_UP or event.key == pygame.K_w:
+                    movey2 = 0
+                if event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                    movey = 0
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    if gun_state == "Ready":
+                        bullet_sound.play()
+                        gunY = playerY
+                        gunX = playerX
+                        fire(gunX, gunY)
+                        gunmoveY = -0.5
+                if event.key == pygame.K_r:
+                    if Restart == "True":
+                        for j in range(num_of_enemies):
+                            enemyX[j] = random.randint(0, 736)
+                            enemyY[j] = random.randint(0, 150)
+                        score_value = 0
+                        menu = "False"
+                        music = "Data/background.wav"
+                        mixer.music.load(music)
+                        mixer.music.play(-1)
+                        Restart = "False"
+                        playerX = 370
+                        playerY = 480
+                        Lives = 3
+                        a = pygame.image.load("Data/heart1.png")
+                        b = pygame.image.load("Data/heart1.png")
+                        c = pygame.image.load("Data/heart1.png")
 
-    if menu == "True":
-        loserfunc(215, 300)
-    if gun_state == "Ready":
-        gunY = playerY
-        gunX = playerX
-
-    # update display
-    # 5=5+x
-    if playerX <= 0:
-        playerX = 0
-    elif playerX >= 736:
-        playerX = 736
-
-    if playerY <= 0:
-        playerY = 0
-    elif playerY >= 536:
-        playerY = 536
-
-    for i in range(num_of_enemies):
-        if enemyX[i] <= 0:
-            enemymoveX[i] = Speed_enemy
-        elif enemyX[i] >= 736:
-            enemymoveX[i] = -1 * Speed_enemy
-
-        if enemyY[i] <= 0:
-            enemymoveY[i] = Speed_enemy
-        elif enemyY[i] >= 536:
-            enemymoveY[i] = -1 * Speed_enemy
-
-        collison2 = collision(enemyX[i], enemyY[i], gunX, gunY, 30)
-        if collison2:
-            if score_value == score_highest:
-                score_highest += 1
-            gun_state = "Ready"
-
-            score_value += 1
-            enemyX[i] = random.randint(0, 736)
-            enemyY[i] = random.randint(0, 150)
-            explosion_sound = mixer.Sound("Data/explosion.wav")
-            explosion_sound.play()
-
-        collision3 = collision(enemyX[i], enemyY[i], playerX, playerY, 60)
-        if collision3:
-            enemyX[i] = random.randint(0, 736)
-            enemyY[i] = random.randint(0, 150)
-            Minecraft = mixer.Sound("Data/Minecraft.mp3")
-            Minecraft.play()
-            Lives -= 1
-            if Lives == 2:
-                a = pygame.image.load("Data/noheart.png")
-            if Lives == 1:
-                b = pygame.image.load("Data/noheart.png")
-            if Lives == 0:
-                c = pygame.image.load("Data/noheart.png")
-                menu = "True"
-                for j in range(num_of_enemies):
-                    enemyX[j] = 300000
-                pygame.mixer.quit()
-                pygame.mixer.init()
-                Lose = mixer.Sound("Data/Loser.mp3")
-                Lose.play()
-                Restart = "True"
-
-        enemy(enemyX[i], enemyY[i], i)
-
-        if gunY <= 0:
+        if menu == "True":
+            loserfunc(215, 300)
+        if gun_state == "Ready":
             gunY = playerY
-            gun_state = "Ready"
-        if gun_state == "Fire":
-            fire(gunX, gunY)
-            gunY += gunmoveY
-        enemyY[i] += enemymoveY[i]
-        enemyX[i] += enemymoveX[i]
-    playerY += movey
-    playerY += movey2
-    playerX += move
-    playerX += move2
+            gunX = playerX
 
-    highest(10, 60)
-    display_score(fontX, fontY)
+        # update display
+        # 5=5+x
+        if playerX <= 0:
+            playerX = 0
+        elif playerX >= 736:
+            playerX = 736
 
-    player(playerimg, playerX, playerY)
-    player(a, 770, 5)
-    player(b, 735, 5)
-    player(c, 700, 5)
+        if playerY <= 0:
+            playerY = 0
+        elif playerY >= 536:
+            playerY = 536
 
-    pygame.display.update()
+        for i in range(num_of_enemies):
+            if enemyX[i] <= 0:
+                enemymoveX[i] = Speed_enemy
+            elif enemyX[i] >= 736:
+                enemymoveX[i] = -1 * Speed_enemy
+
+            if enemyY[i] <= 0:
+                enemymoveY[i] = Speed_enemy
+            elif enemyY[i] >= 536:
+                enemymoveY[i] = -1 * Speed_enemy
+
+            collison2 = collision(enemyX[i], enemyY[i], gunX, gunY, 30)
+            if collison2:
+                if score_value == score_highest:
+                    score_highest += 1
+                gun_state = "Ready"
+
+                score_value += 1
+                enemyX[i] = random.randint(0, 736)
+                enemyY[i] = random.randint(0, 150)
+                explosion_sound = mixer.Sound("Data/explosion.wav")
+                explosion_sound.play()
+
+            collision3 = collision(enemyX[i], enemyY[i], playerX, playerY, 60)
+            if collision3:
+                enemyX[i] = random.randint(0, 736)
+                enemyY[i] = random.randint(0, 150)
+                Minecraft = mixer.Sound("Data/Minecraft.ogg")
+                Minecraft.play()
+                Lives -= 1
+                if Lives == 2:
+                    a = pygame.image.load("Data/noheart.png")
+                if Lives == 1:
+                    b = pygame.image.load("Data/noheart.png")
+                if Lives == 0:
+                    c = pygame.image.load("Data/noheart.png")
+                    menu = "True"
+                    for j in range(num_of_enemies):
+                        enemyX[j] = 300000
+                    pygame.mixer.quit()
+                    pygame.mixer.init()
+
+                    Lose.play()
+                    Restart = "True"
+
+            enemy(enemyX[i], enemyY[i], i)
+
+            if gunY <= 0:
+                gunY = playerY
+                gun_state = "Ready"
+            if gun_state == "Fire":
+                fire(gunX, gunY)
+                gunY += gunmoveY*4
+            enemyY[i] += enemymoveY[i]
+            enemyX[i] += enemymoveX[i]
+        playerY += movey*10
+        playerY += movey2*10
+        playerX += move*10
+        playerX += move2*10
+
+        highest(10, 60)
+        display_score(fontX, fontY)
+
+        player(playerimg, playerX, playerY)
+        player(a, 770, 5)
+        player(b, 735, 5)
+        player(c, 700, 5)
+
+        pygame.display.update()
+        await asyncio.sleep(0)
+
+
+# Define initial values for global variables
+
+running = True
+# Run the main function using asyncio.run
+asyncio.run(main())
